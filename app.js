@@ -1,5 +1,6 @@
 const tileDisplay = document.querySelector('.tile-container');
 const keyboard = document.querySelector('.key-container');
+const messageDisplay = document.querySelector('.message-container')
 
 const wordle = 'SUPER';
 const keys = [
@@ -30,7 +31,7 @@ const keys = [
   'B',
   'N',
   'M',
-  'BACK',
+  'DEL',
 ];
 
 const guessRows = [
@@ -42,8 +43,9 @@ const guessRows = [
   ['', '', '', '', '']
 ];
 
-let currentRow = 0;
-let currentTile = 0;
+let currentRow = 0
+let currentTile = 0
+let isGameOver = false
 
 guessRows.forEach((guessRow, guessRowIndex) => {
   const rowElement = document.createElement('div')
@@ -67,11 +69,12 @@ keys.forEach(key => {
 
 const handleClick = (key) => {
   console.log('clicked', key);
-  if (key === 'BACK') {
-    console.log('delete letter')
+  if (key === 'DEL') {
+    deleteLetter()
     return
   }
   if (key === 'ENTER') {
+    checkRow()
     console.log('check row')
     return
   }
@@ -97,4 +100,47 @@ const deleteLetter = () => {
     guessRows[currentRow][currentTile] = ''
     tile.setAttribute('data', '')
   }
+}
+
+const checkRow = () => {
+  const guess = guessRows[currentRow].join('')
+  if (currentTile > 4) {
+    console.log('guess is ' + guess, 'wordle is ' + wordle)
+    flipTile()
+    if (wordle === guess) {
+      showMessage('Great!')
+      isGameOver = true
+      return
+    } else {
+        if (currentRow >= 5) {
+          isGameOver = true
+          return
+        }
+        if (currentRow < 5) {
+          currentRow++
+          currentTile = 0
+        }
+    }
+  }
+}
+
+const showMessage = (message) => {
+  const messageElement = document.createElement('p')
+  messageElement.textContent = message
+  messageDisplay.append(messageElement)
+  setTimeout(() => messageDisplay.removeChild(messageElement), 1800)
+}
+
+const flipTile = () => {
+  const rowTiles = document.querySelector('#guessRow-' + currentRow).childNodes
+  rowTiles.forEach((tile, index) => {
+    const dataLetter = tile.getAttribute('data')
+    if (dataLetter === wordle[index]) {
+      tile.classList.add('green-tile')
+    } else if (wordle.includes(dataLetter)) {
+      tile.classList.add('yellow-tile')
+    } else {
+      tile.classList.add('gray-tile')
+    }
+  })
 }
